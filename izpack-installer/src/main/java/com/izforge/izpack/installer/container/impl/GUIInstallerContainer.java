@@ -124,7 +124,7 @@ public class GUIInstallerContainer extends InstallerContainer
         // message equal to key -> no message defined.
         if (message.equals(key))
         {
-            message = messages.get("installer.title") + installData.getInfo().getAppName() + " " + installData.getInfo().getAppVersion();
+            message = messages.get("installer.title") + " " + installData.getInfo().getAppName();
         }
         else
         {
