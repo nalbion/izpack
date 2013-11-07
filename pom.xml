@@ -51,7 +51,18 @@
                 <groupId>bsf</groupId>
                 <artifactId>bsf</artifactId>
                 <version>2.4.0</version>
+                <exclusions>
+                	<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+                </exclusions>
             </dependency>
+            <dependency>
+        		<groupId>commons-logging</groupId>
+				<artifactId>commons-logging</artifactId>
+				<version>1.1.1</version>
+        	</dependency>
             <dependency>
                 <groupId>jakarta-regexp</groupId>
                 <artifactId>jakarta-regexp</artifactId>
@@ -242,11 +253,17 @@
                 <groupId>org.jdom</groupId>
                 <artifactId>jdom</artifactId>
                 <version>1.1.2</version>
+                <exclusions>
+                	<exclusion>
+                		<groupId>jaxen</groupId>
+                		<artifactId>jaxen</artifactId>
+                	</exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>jaxen</groupId>
                 <artifactId>jaxen</artifactId>
-                <version>1.1.3</version>
+                <version>1.1.4</version>
                 <exclusions>
                     <exclusion>
                         <groupId>maven-plugins</groupId>
@@ -333,6 +350,12 @@
                 <groupId>org.apache.maven.shared</groupId>
                 <artifactId>maven-shared-jar</artifactId>
                 <version>1.1</version>
+                <exclusions>
+                	<exclusion>
+                		<groupId>org.codehaus.plexus</groupId>
+        				<artifactId>plexus-digest</artifactId>
+                	</exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -378,6 +401,24 @@
 
     <build>
         <plugins>
+        	<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>1.0</version>
+				<executions>
+					<execution>
+						<id>enforce-dependency-convergence</id>
+						<configuration>
+							<rules> 
+								<DependencyConvergence />
+							</rules>
+						</configuration>
+						<goals> 
+							<goal>enforce</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-source-plugin</artifactId>
@@ -794,7 +835,15 @@
             <id>codehaus.org</id>
             <url>dav:https://dav.codehaus.org/izpack/</url>
         </site>
-    </distributionManagement>
+	    <repository>
+			<id>thirdparty</id>
+			<url>http://tsm-bs-ptips02:8081/nexus/content/repositories/thirdparty</url>
+		</repository>
+		<snapshotRepository>
+			<id>thirdparty-snapshots</id>
+			<url>http://tsm-bs-ptips02:8081/nexus/content/repositories/thirdparty-snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 </project>
 
