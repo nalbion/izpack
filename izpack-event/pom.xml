@@ -28,6 +28,10 @@
             <artifactId>bsf</artifactId>
         </dependency>
         <dependency>
+        	<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+        </dependency>
+        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>izpack-test-common</artifactId>
             <scope>test</scope>
