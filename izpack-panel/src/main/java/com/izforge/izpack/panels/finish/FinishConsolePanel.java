@@ -185,6 +185,7 @@ public class FinishConsolePanel extends AbstractConsolePanel
             IXMLElement root;
             root = installData.getXmlData();
 
+            // TODO: refactor into FinishPanelHelper.saveAutoInstallXml();
             AutomatedPanels automatedPanels;
             automatedPanels = getAutomatedPanels(installData);
 
@@ -200,6 +201,7 @@ public class FinishConsolePanel extends AbstractConsolePanel
             writer.write(root);
             outputStream.flush();
 
+            FinishPanelHelper.savePopulatedOptionsFile(root, file);
         }
         catch (Exception e)
         {

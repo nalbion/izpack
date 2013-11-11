@@ -27,6 +27,7 @@ import java.awt.event.ActionListener;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -34,6 +35,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import com.izforge.izpack.api.GuiId;
+import com.izforge.izpack.api.adaptator.IXMLElement;
 import com.izforge.izpack.api.data.Panel;
 import com.izforge.izpack.api.resource.Resources;
 import com.izforge.izpack.gui.AutomatedInstallScriptFilter;
@@ -167,11 +169,15 @@ public class FinishPanel extends IzPanel implements ActionListener
             {
                 // We handle the xml installDataGUI writing
                 File file = fileChooser.getSelectedFile();
+                // TODO: refactor into FinishPanelHelper.saveAutoInstallXml();
                 FileOutputStream out = new FileOutputStream(file);
                 BufferedOutputStream outBuff = new BufferedOutputStream(out, 5120);
-                parent.writeXMLTree(this.installData.getXmlData(), outBuff);
+                IXMLElement xmlData = this.installData.getXmlData();
+                parent.writeXMLTree(xmlData, outBuff);
                 outBuff.flush();
                 outBuff.close();
+                
+                FinishPanelHelper.savePopulatedOptionsFile(xmlData, file);
 
                 autoButton.setEnabled(false);
             }
