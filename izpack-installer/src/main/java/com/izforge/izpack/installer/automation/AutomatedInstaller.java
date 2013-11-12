@@ -26,6 +26,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.logging.Logger;
 
+import javax.xml.crypto.NodeSetData;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
 import com.izforge.izpack.api.adaptator.IXMLElement;
 import com.izforge.izpack.api.adaptator.IXMLParser;
 import com.izforge.izpack.api.adaptator.impl.XMLParser;
@@ -117,6 +126,8 @@ public class AutomatedInstaller extends InstallerBase
         File input = new File(inputFilename);
         // Loads the xml data
         installData.setXmlData(getXMLData(input));
+        
+        mergeSystemProperties( installData.getXmlData() );
 
         // Loads the langpack
         String code = installData.getXmlData().getAttribute("langpack", "eng");
@@ -124,6 +135,30 @@ public class AutomatedInstaller extends InstallerBase
         installData.setMessages(locales.getMessages());
         installData.setLocale(locales.getLocale(), locales.getISOCode());
         installData.setMediaPath(mediaPath);
+    }
+    
+    private void mergeSystemProperties( IXMLElement xmlData ) {
+    	XPath xpath = XPathFactory.newInstance().newXPath();  
+    	xmlData.getElement();
+    	
+    	try {
+			NodeList entries = (NodeList)xpath.evaluate("//entry", xmlData, XPathConstants.NODESET);
+			int i = entries.getLength();
+			while( i-- != 0 ) {
+				Element entry = (Element)entries.item(i);
+				String key = entry.getAttribute("key");
+				String oldValue = entry.getAttribute("value");
+				String newValue = System.getProperty(key);
+				if( newValue != null && !newValue.equals(oldValue) ) {
+					System.out.println("Warning: Property " + key + " overwritten: '"
+                            + oldValue + "' --> '" + newValue + "'");
+					entry.setAttribute(key, newValue);
+				}
+			}
+			
+		} catch (XPathExpressionException e) {
+			e.printStackTrace();
+		}
     }
 
     /**
