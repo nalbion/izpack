@@ -26,6 +26,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.Properties;
 
@@ -42,6 +43,7 @@ import com.izforge.izpack.gui.AutomatedInstallScriptFilter;
 import com.izforge.izpack.gui.ButtonFactory;
 import com.izforge.izpack.gui.LabelFactory;
 import com.izforge.izpack.gui.log.Log;
+import com.izforge.izpack.gui.log.LogError;
 import com.izforge.izpack.installer.data.GUIInstallData;
 import com.izforge.izpack.installer.data.UninstallDataWriter;
 import com.izforge.izpack.installer.gui.InstallerFrame;
@@ -53,6 +55,7 @@ import com.izforge.izpack.installer.gui.IzPanel;
  * @author Julien Ponge
  */
 public class FinishPanel extends IzPanel implements ActionListener
+
 {
 
     private static final long serialVersionUID = 3257282535107998009L;
@@ -129,14 +132,24 @@ public class FinishPanel extends IzPanel implements ActionListener
                                         LEADING), constraints);
                 constraints.gridy++;
             }
-            // We add the autoButton
-            autoButton = ButtonFactory.createButton(getString("FinishPanel.auto"),
-                                                    parent.getIcons().get("edit"), this.installData.buttonsHColor);
-            autoButton.setName(GuiId.FINISH_PANEL_AUTO_BUTTON.id);
-            autoButton.setToolTipText(getString("FinishPanel.auto.tip"));
-            autoButton.addActionListener(this);
-            add(autoButton, constraints);
-            constraints.gridy++;
+            
+            if( false ) {
+            	// We add the autoButton
+            	autoButton = ButtonFactory.createButton(getString("FinishPanel.auto"),
+            											parent.getIcons().get("edit"), this.installData.buttonsHColor);
+            	autoButton.setName(GuiId.FINISH_PANEL_AUTO_BUTTON.id);
+            	autoButton.setToolTipText(getString("FinishPanel.auto.tip"));
+            	autoButton.addActionListener(this);
+            	add(autoButton, constraints);
+            	constraints.gridy++;
+            } else {
+            	File autoInstallXml = new File( installData.getInstallPath(), "auto-install.xml" );
+            	try {
+					saveAutoInstallXml( autoInstallXml );
+				} catch (Exception e) {
+					log.addError( LogError.COULD_NOT_WRITE_FILE, new String[]{"Failed to write auto-install files"}, e);
+				}
+            }
         }
         else
         {
@@ -169,15 +182,7 @@ public class FinishPanel extends IzPanel implements ActionListener
             {
                 // We handle the xml installDataGUI writing
                 File file = fileChooser.getSelectedFile();
-                // TODO: refactor into FinishPanelHelper.saveAutoInstallXml();
-                FileOutputStream out = new FileOutputStream(file);
-                BufferedOutputStream outBuff = new BufferedOutputStream(out, 5120);
-                IXMLElement xmlData = this.installData.getXmlData();
-                parent.writeXMLTree(xmlData, outBuff);
-                outBuff.flush();
-                outBuff.close();
-                
-                FinishPanelHelper.savePopulatedOptionsFile(xmlData, file);
+                saveAutoInstallXml(file);
 
                 autoButton.setEnabled(false);
             }
@@ -188,6 +193,18 @@ public class FinishPanel extends IzPanel implements ActionListener
             JOptionPane.showMessageDialog(this, err.toString(), getString("installer.error"),
                                           JOptionPane.ERROR_MESSAGE);
         }
+    }
+    
+    private void saveAutoInstallXml( File file ) throws Exception {
+    	// TODO: refactor into FinishPanelHelper.saveAutoInstallXml();
+        FileOutputStream out = new FileOutputStream(file);
+        BufferedOutputStream outBuff = new BufferedOutputStream(out, 5120);
+        IXMLElement xmlData = this.installData.getXmlData();
+        parent.writeXMLTree(xmlData, outBuff);
+        outBuff.flush();
+        outBuff.close();
+        
+        FinishPanelHelper.savePopulatedOptionsFile(xmlData, file);
     }
 
     /**
