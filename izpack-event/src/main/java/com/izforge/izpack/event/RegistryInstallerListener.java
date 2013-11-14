@@ -251,15 +251,19 @@ public class RegistryInstallerListener extends AbstractProgressInstallerListener
     /**
      * Returns the uninstall name, used to initialise the {@link RegistryHandler#setUninstallName(String)}.
      * <p/>
-     * This implementation returns a concatenation of the <em>APP_NAME</em> and <em>APP_VER</em> variables,
-     * separated by a space.
+     * This implementation returns <em>UNINSTALL_NAME</em> if defined, otherwise a concatenation of 
+     * the <em>APP_NAME</em> and <em>APP_VER</em> variables, separated by a space.
      *
      * @return the uninstall name
      */
     protected String getUninstallName()
-    {
+    {  	
         Variables variables = getInstallData().getVariables();
-        return variables.get("APP_NAME") + " " + variables.get("APP_VER");
+        String uninstallName = variables.get("UNINSTALL_NAME");
+        if( uninstallName == null ) {
+        	uninstallName = variables.get("APP_NAME") + " " + variables.get("APP_VER");
+        }       
+        return uninstallName;
     }
 
    private void afterPacks(List<Pack> packs) throws NativeLibException, InstallerException
@@ -289,6 +293,9 @@ public class RegistryInstallerListener extends AbstractProgressInstallerListener
 
             }
         }
+        
+        // Update UNINSTALL_NAME in case it's set by a dynamic variable
+        registry.setUninstallName(getUninstallName());
         String uninstallSuffix = getInstallData().getVariable("UninstallKeySuffix");
         if (uninstallSuffix != null)
         {
@@ -551,7 +558,7 @@ public class RegistryInstallerListener extends AbstractProgressInstallerListener
                 + uninstallerPath + "\\" + installData.getInfo().getUninstallerName() + "\"";
         String appVersion = installData.getVariable("APP_VER");
         String appUrl = installData.getVariable("APP_URL");
-
+        
         try
         {
             registry.setRoot(RegistryHandler.HKEY_LOCAL_MACHINE);
@@ -575,12 +582,13 @@ public class RegistryInstallerListener extends AbstractProgressInstallerListener
         FileOutputStream out = null;
         try
         {
-            in = resources.getInputStream(UNINSTALLER_ICON);
-            String iconPath = installData.getVariable("INSTALL_PATH") + File.separator
-                    + "Uninstaller" + File.separator + "UninstallerIcon.ico";
-            out = new FileOutputStream(iconPath);
+            in = resources.getInputStream(UNINSTALLER_ICON);  
+            File path = new File( installData.getVariable("INSTALL_PATH"), "Uninstaller" );
+            path.mkdirs();
+            File iconFile = new File(path, "UninstallerIcon.ico");
+            out = new FileOutputStream(iconFile);
             IoHelper.copyStream(in, out);
-            registry.setValue(keyName, "DisplayIcon", iconPath);
+            registry.setValue(keyName, "DisplayIcon", iconFile.getAbsolutePath());
         }
         catch (ResourceNotFoundException exception)
         {
