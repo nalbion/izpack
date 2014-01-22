@@ -48,6 +48,7 @@ import com.izforge.izpack.installer.data.GUIInstallData;
 import com.izforge.izpack.installer.data.UninstallDataWriter;
 import com.izforge.izpack.installer.gui.InstallerFrame;
 import com.izforge.izpack.installer.gui.IzPanel;
+import com.izforge.izpack.util.IoHelper;
 
 /**
  * The finish panel class.
@@ -123,7 +124,8 @@ public class FinishPanel extends IzPanel implements ActionListener
             if (uninstallDataWriter.isUninstallRequired())
             {
                 // We prepare a message for the uninstaller feature
-                String path = translatePath("$INSTALL_PATH") + File.separator + "Uninstaller";
+                //String path = translatePath("$INSTALL_PATH") + File.separator + "Uninstaller";
+                String path = IoHelper.translatePath(installData.getInfo().getUninstallerPath(), installData.getVariables());
 
                 add(LabelFactory.create(getString("FinishPanel.uninst.info"), parent.getIcons()
                         .get("preferences"), LEADING), constraints);

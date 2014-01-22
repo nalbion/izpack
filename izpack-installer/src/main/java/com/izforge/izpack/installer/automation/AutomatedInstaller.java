@@ -139,10 +139,9 @@ public class AutomatedInstaller extends InstallerBase
     
     private void mergeSystemProperties( IXMLElement xmlData ) {
     	XPath xpath = XPathFactory.newInstance().newXPath();  
-    	xmlData.getElement();
     	
     	try {
-			NodeList entries = (NodeList)xpath.evaluate("//entry", xmlData, XPathConstants.NODESET);
+			NodeList entries = (NodeList)xpath.evaluate("//entry", xmlData.getElement(), XPathConstants.NODESET);
 			int i = entries.getLength();
 			while( i-- != 0 ) {
 				Element entry = (Element)entries.item(i);
