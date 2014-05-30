@@ -26,7 +26,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -34,16 +36,19 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
 import com.izforge.izpack.api.GuiId;
+import com.izforge.izpack.api.adaptator.IXMLElement;
 import com.izforge.izpack.api.data.Panel;
 import com.izforge.izpack.api.resource.Resources;
 import com.izforge.izpack.gui.AutomatedInstallScriptFilter;
 import com.izforge.izpack.gui.ButtonFactory;
 import com.izforge.izpack.gui.LabelFactory;
 import com.izforge.izpack.gui.log.Log;
+import com.izforge.izpack.gui.log.LogError;
 import com.izforge.izpack.installer.data.GUIInstallData;
 import com.izforge.izpack.installer.data.UninstallDataWriter;
 import com.izforge.izpack.installer.gui.InstallerFrame;
 import com.izforge.izpack.installer.gui.IzPanel;
+import com.izforge.izpack.util.IoHelper;
 
 /**
  * The finish panel class.
@@ -51,6 +56,7 @@ import com.izforge.izpack.installer.gui.IzPanel;
  * @author Julien Ponge
  */
 public class FinishPanel extends IzPanel implements ActionListener
+
 {
 
     private static final long serialVersionUID = 3257282535107998009L;
@@ -118,7 +124,8 @@ public class FinishPanel extends IzPanel implements ActionListener
             if (uninstallDataWriter.isUninstallRequired())
             {
                 // We prepare a message for the uninstaller feature
-                String path = translatePath("$INSTALL_PATH") + File.separator + "Uninstaller";
+                //String path = translatePath("$INSTALL_PATH") + File.separator + "Uninstaller";
+                String path = IoHelper.translatePath(installData.getInfo().getUninstallerPath(), installData.getVariables());
 
                 add(LabelFactory.create(getString("FinishPanel.uninst.info"), parent.getIcons()
                         .get("preferences"), LEADING), constraints);
@@ -127,14 +134,24 @@ public class FinishPanel extends IzPanel implements ActionListener
                                         LEADING), constraints);
                 constraints.gridy++;
             }
-            // We add the autoButton
-            autoButton = ButtonFactory.createButton(getString("FinishPanel.auto"),
-                                                    parent.getIcons().get("edit"), this.installData.buttonsHColor);
-            autoButton.setName(GuiId.FINISH_PANEL_AUTO_BUTTON.id);
-            autoButton.setToolTipText(getString("FinishPanel.auto.tip"));
-            autoButton.addActionListener(this);
-            add(autoButton, constraints);
-            constraints.gridy++;
+            
+            if( false ) {
+            	// We add the autoButton
+            	autoButton = ButtonFactory.createButton(getString("FinishPanel.auto"),
+            											parent.getIcons().get("edit"), this.installData.buttonsHColor);
+            	autoButton.setName(GuiId.FINISH_PANEL_AUTO_BUTTON.id);
+            	autoButton.setToolTipText(getString("FinishPanel.auto.tip"));
+            	autoButton.addActionListener(this);
+            	add(autoButton, constraints);
+            	constraints.gridy++;
+            } else {
+            	File autoInstallXml = new File( installData.getInstallPath(), "auto-install.xml" );
+            	try {
+					saveAutoInstallXml( autoInstallXml );
+				} catch (Exception e) {
+					log.addError( LogError.COULD_NOT_WRITE_FILE, new String[]{"Failed to write auto-install files"}, e);
+				}
+            }
         }
         else
         {
@@ -167,11 +184,7 @@ public class FinishPanel extends IzPanel implements ActionListener
             {
                 // We handle the xml installDataGUI writing
                 File file = fileChooser.getSelectedFile();
-                FileOutputStream out = new FileOutputStream(file);
-                BufferedOutputStream outBuff = new BufferedOutputStream(out, 5120);
-                parent.writeXMLTree(this.installData.getXmlData(), outBuff);
-                outBuff.flush();
-                outBuff.close();
+                saveAutoInstallXml(file);
 
                 autoButton.setEnabled(false);
             }
@@ -182,6 +195,18 @@ public class FinishPanel extends IzPanel implements ActionListener
             JOptionPane.showMessageDialog(this, err.toString(), getString("installer.error"),
                                           JOptionPane.ERROR_MESSAGE);
         }
+    }
+    
+    private void saveAutoInstallXml( File file ) throws Exception {
+    	// TODO: refactor into FinishPanelHelper.saveAutoInstallXml();
+        FileOutputStream out = new FileOutputStream(file);
+        BufferedOutputStream outBuff = new BufferedOutputStream(out, 5120);
+        IXMLElement xmlData = this.installData.getXmlData();
+        parent.writeXMLTree(xmlData, outBuff);
+        outBuff.flush();
+        outBuff.close();
+        
+        FinishPanelHelper.savePopulatedOptionsFile(xmlData, file);
     }
 
     /**

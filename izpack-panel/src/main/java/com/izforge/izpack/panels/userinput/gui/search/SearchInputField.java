@@ -185,8 +185,8 @@ public class SearchInputField implements ActionListener
     {
         if (path != null)
         {
-        	path = resolveEnvValue(path, System.getenv());
-        	
+            path = resolveEnvValue(path, System.getenv());
+
             File file;
             if (filename == null || searchType == SearchType.DIRECTORY)
             {
@@ -209,7 +209,7 @@ public class SearchInputField implements ActionListener
                     file = new File(file, checkFilename);
                     if( !file.exists() ) 
                     {
-                        System.out.println( file.getAbsolutePath() + " does not exist");                            
+                        System.out.println( file.getAbsolutePath() + " does not exist");
                         return false;
                     }
                 } 

@@ -57,7 +57,18 @@
                 <groupId>bsf</groupId>
                 <artifactId>bsf</artifactId>
                 <version>2.4.0</version>
+                <exclusions>
+                	<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+                </exclusions>
             </dependency>
+            <dependency>
+        		<groupId>commons-logging</groupId>
+				<artifactId>commons-logging</artifactId>
+				<version>1.1.1</version>
+        	</dependency>
             <dependency>
                 <groupId>jakarta-regexp</groupId>
                 <artifactId>jakarta-regexp</artifactId>
@@ -240,6 +251,55 @@
                 <version>${project.version}</version>
             </dependency>
 
+            <!-- Parsers -->
+            <dependency>
+                <groupId>org.jdom</groupId>
+                <artifactId>jdom</artifactId>
+                <version>1.1.2</version>
+                <exclusions>
+                	<exclusion>
+                		<groupId>jaxen</groupId>
+                		<artifactId>jaxen</artifactId>
+                	</exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>jaxen</groupId>
+                <artifactId>jaxen</artifactId>
+                <version>1.1.4</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>maven-plugins</groupId>
+                        <artifactId>maven-cobertura-plugin</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>maven-plugins</groupId>
+                        <artifactId>maven-findbugs-plugin</artifactId>
+                    </exclusion>
+                    <!--
+                    exclude conflicting dependencies, already resolved in a different way
+                    XML parsers are part of newer JDKs
+                    -->
+                    <exclusion>
+                        <groupId>xerces</groupId>
+                        <artifactId>xercesImpl</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>xml-apis</groupId>
+                        <artifactId>xml-apis</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>xom</groupId>
+                        <artifactId>xom</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.wutka</groupId>
+                <artifactId>dtdparser</artifactId>
+                <version>1.21</version>
+            </dependency>
+
             <!-- Inner dependencies to test jar -->
             <dependency>
                 <artifactId>izpack-core</artifactId>
@@ -293,6 +353,12 @@
                 <groupId>org.apache.maven.shared</groupId>
                 <artifactId>maven-shared-jar</artifactId>
                 <version>1.1</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.codehaus.plexus</groupId>
+                        <artifactId>plexus-digest</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <dependency>
@@ -345,7 +411,7 @@
 				<version>1.3.1</version>
 				<executions>
 					<execution>
-						<id>enforce-dependency-versions</id>
+						<id>enforce-dependency-convergence</id>
 						<configuration>
 							<rules> 
 								<DependencyConvergence>
@@ -881,7 +947,15 @@
             <id>codehaus.org</id>
             <url>dav:https://dav.codehaus.org/izpack/</url>
         </site>
-    </distributionManagement>
+	    <repository>
+			<id>thirdparty</id>
+			<url>http://tsm-bs-ptips02:8081/nexus/content/repositories/thirdparty</url>
+		</repository>
+		<snapshotRepository>
+			<id>thirdparty-snapshots</id>
+			<url>http://tsm-bs-ptips02:8081/nexus/content/repositories/thirdparty-snapshots</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 </project>
 
